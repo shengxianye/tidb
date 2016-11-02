@@ -71,7 +71,7 @@ import (
 	dayofweek	"DAYOFWEEK"
 	dayofyear	"DAYOFYEAR"
 	foundRows	"FOUND_ROWS"
-    fromUnixTime    "FROM_UNIXTIME"
+	fromUnixTime	"FROM_UNIXTIME"
 	groupConcat	"GROUP_CONCAT"
 	greatest	"GREATEST"
 	hour		"HOUR"
@@ -2575,19 +2575,19 @@ FunctionCallNonKeyword:
 		$$ =  &ast.FuncCallExpr{FnName: model.NewCIStr($1)}
 	}
 |	"FROM_UNIXTIME" '(' Expression ')'
-    {
-    	$$ = &ast.FuncCallExpr{
-    		FnName: model.NewCIStr($1),
-    		Args: []ast.ExprNode{$3.(ast.ExprNode)},
-    	}
-    }
+	{
+		$$ = &ast.FuncCallExpr{
+			FnName: model.NewCIStr($1),
+			Args: []ast.ExprNode{$3.(ast.ExprNode)},
+		}
+	}
 |	"FROM_UNIXTIME" '(' Expression ',' Expression ')'
-    {
-        $$ = &ast.FuncCallExpr{
-        	FnName: model.NewCIStr($1),
-        	Args: []ast.ExprNode{$3.(ast.ExprNode), $5.(ast.ExprNode)},
-        }
-    }
+	{
+		$$ = &ast.FuncCallExpr{
+			FnName: model.NewCIStr($1),
+			Args: []ast.ExprNode{$3.(ast.ExprNode), $5.(ast.ExprNode)},
+		}
+	}
 |	"GREATEST" '(' ExpressionList ')'
 	{
 		$$ = &ast.FuncCallExpr{FnName: model.NewCIStr($1), Args: $3.([]ast.ExprNode)}
