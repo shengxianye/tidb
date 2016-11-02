@@ -21,6 +21,7 @@ import (
 	"github.com/pingcap/tidb/parser/opcode"
 	"github.com/pingcap/tidb/util/charset"
 	"github.com/pingcap/tidb/util/types"
+	"github.com/ngaut/log"
 )
 
 // InferType infers result type for ast.ExprNode.
@@ -295,6 +296,13 @@ func (v *typeInferrer) handleFuncCallExpr(x *ast.FuncCallExpr) {
 	case "now", "sysdate":
 		tp = types.NewFieldType(mysql.TypeDatetime)
 		tp.Decimal = v.getFsp(x)
+	case "from_unixtime":
+		log.Error("here")
+		if len(x.Args) == 1 {
+			tp = types.NewFieldType(mysql.TypeDatetime)
+		}else {
+			tp = types.NewFieldType(mysql.TypeVarString)
+		}
 	case "dayname", "version", "database", "user", "current_user",
 		"concat", "concat_ws", "left", "lcase", "lower", "repeat",
 		"replace", "ucase", "upper", "convert", "substring",

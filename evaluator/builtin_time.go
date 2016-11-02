@@ -601,6 +601,43 @@ func builtinYearWeek(args []types.Datum, _ context.Context) (types.Datum, error)
 	return d, nil
 }
 
+// http://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_from-unixtime
+func builtinFromUnixTime(args []types.Datum, _ context.Context) (d types.Datum, err error) {
+	fsp := 6
+	unixTimestamp, err := args[0].ToDecimal()
+	if err != nil {
+		return types.Datum{}, errors.Trace(err)
+	}
+	// unixTimestamp >= 0 && unixTimestamp <= INT32_MAX
+	if unixTimestamp.IsNegative() {
+		return
+	}
+	integerPartInt64, err := unixTimestamp.ToInt()
+	if err != nil && err != mysql.ErrTruncated {
+		return d, errors.Trace(err)
+	}
+	maxInt32 := 1<<31 - 1
+	if integerPartInt64 > int64(maxInt32) {
+		return
+	}
+	_, fracPart := unixTimestamp.PrecisionAndFrac()
+	t := mysql.Time{
+		Time: time.Unix(integerPartInt64, int64(fracPart)*1000000),
+		Type: mysql.TypeDatetime,
+		// set unspecified for later round
+		Fsp: mysql.MaxFsp,
+	}
+	tr, err := t.RoundFrac(int(fsp))
+	if err != nil {
+		return d, errors.Trace(err)
+	}
+	d.SetMysqlTime(tr)
+	if len(args) == 1 {
+		return
+	}
+	return builtinDateFormat([]types.Datum{d, args[1]}, nil)
+}
+
 func builtinSysDate(args []types.Datum, ctx context.Context) (types.Datum, error) {
 	// SYSDATE is not the same as NOW if NOW is used in a stored function or trigger.
 	// But here we can just think they are the same because we don't support stored function
